@@ -1,6 +1,7 @@
 public class TicTacToe {
-    char[][] board;
+    private char[][] board;
     private final Player[] players = new Player[2];
+    public Computer comp;
     private boolean gameOver;
 
     TicTacToe(){
@@ -15,6 +16,49 @@ public class TicTacToe {
         this.players[0] = new Player('X');
         this.players[1] = new Player('O');
     }
+    TicTacToe(Player One, Player Two){
+        this.board = new char[][]{
+                {' ', ' ', ' '},
+                {' ', ' ', ' '},
+                {' ', ' ', ' '},
+        };
+
+        this.gameOver = false;
+
+        if(One.getSymbol() == 'X' || One.getSymbol() == 'x'){
+            this.players[0] = new Player(One.getSymbol());
+            this.players[1] = new Player(Two.getSymbol());
+        }
+        else if(One.getSymbol() == 'O' || One.getSymbol() == 'o'){
+            this.players[1] = new Player(One.getSymbol());
+            this.players[0] = new Player(Two.getSymbol());
+        }
+        else{
+            System.out.println("Invalid Symbol");
+            System.exit(1);
+        }
+    }
+
+    TicTacToe(Player player, Computer comp){
+        this.board = new char[][]{
+                {' ', ' ', ' '},
+                {' ', ' ', ' '},
+                {' ', ' ', ' '},
+        };
+
+        this.gameOver = false;
+
+        if(player.getSymbol() == 'X' || player.getSymbol() == 'x'){
+            this.players[0] = new Player('X');
+            this.players[1] = null;
+            this.comp = comp;
+        }
+        else if(player.getSymbol() == 'O' || player.getSymbol() == 'o'){
+            this.players[1] = new Player('O');
+            this.players[0] = null;
+            this.comp = comp;
+        }
+    }
 
     public void gameLoop(){
         if(!checkSymbols()){
@@ -28,38 +72,67 @@ public class TicTacToe {
         while(!this.gameOver){
             int[] coordinatesP1, coordinatesP2;
 
-            System.out.println("Player 1 Turn");
-            do{
-                coordinatesP1 = players[0].myTurn();
-            } while(this.validCoordinates(coordinatesP1));
+            if(players[0] != null){
+                System.out.println("Player 1 Turn");
+                do{
+                    coordinatesP1 = players[0].myTurn();
+                } while(this.validCoordinates(coordinatesP1));
 
-            this.drawSymbols(players[0].getSymbol(), coordinatesP1);
-            this.drawBoard();
+                this.drawSymbols(players[0].getSymbol(), coordinatesP1);
+                this.drawBoard();
 
-            if(checkWin(players[0].getSymbol())){
-                System.out.printf("Player %s Won", players[0].getSymbol());
-                gameOver = true;
-                break;
+                if(checkWin(players[0].getSymbol())){
+                    System.out.printf("Player %s Won", players[0].getSymbol());
+                    gameOver = true;
+                    break;
+                }
             }
+            else{
+                System.out.println("Computer Turn");
 
-            System.out.println("Player 2 Turn");
-            do{
-                coordinatesP2 = players[1].myTurn();
-            } while(this.validCoordinates(coordinatesP2));
+                coordinatesP1 = this.comp.computerTurn(this.board);
+                this.drawSymbols(comp.getSymbol(), coordinatesP1);
+                this.drawBoard();
 
-            this.drawSymbols(players[1].getSymbol(), coordinatesP2);
-            this.drawBoard();
-
-            if(checkWin(players[1].getSymbol())){
-                System.out.printf("Player %s Won", players[1].getSymbol());
-                gameOver = true;
-                break;
+                if(checkWin(comp.getSymbol())){
+                    System.out.printf("Computer %s Won", comp.getSymbol());
+                    gameOver = true;
+                    break;
+                }
             }
+            if(players[1] != null){
+                System.out.println("Player 2 Turn");
+                do{
+                    coordinatesP2 = players[1].myTurn();
+                } while(this.validCoordinates(coordinatesP2));
 
-            if(checkDraw()){
-                System.out.println("Game is Draw!");
-                gameOver = true;
-                break;
+                this.drawSymbols(players[1].getSymbol(), coordinatesP2);
+                this.drawBoard();
+
+                if(checkWin(players[1].getSymbol())){
+                    System.out.printf("Player %s Won", players[1].getSymbol());
+                    gameOver = true;
+                    break;
+                }
+
+                if(checkDraw()){
+                    System.out.println("Game is Draw!");
+                    gameOver = true;
+                    break;
+                }
+            }
+            else{
+                System.out.println("Computer Turn");
+
+                coordinatesP2 = this.comp.computerTurn(this.board);
+                this.drawSymbols(comp.getSymbol(), coordinatesP2);
+                this.drawBoard();
+
+                if(checkWin(comp.getSymbol())){
+                    System.out.printf("Computer %s Won", comp.getSymbol());
+                    gameOver = true;
+                    break;
+                }
             }
         }
     }
@@ -70,7 +143,10 @@ public class TicTacToe {
         this.board[row][col] = symbol;
     }
     private boolean checkSymbols(){
-        return this.players[0].getSymbol() != this.players[1].getSymbol();
+        if(players[0] != null && players[1] != null){
+            return this.players[0].getSymbol() != this.players[1].getSymbol();
+        }
+        return true;
     }
 
     private boolean validCoordinates(int[] coordinates){
